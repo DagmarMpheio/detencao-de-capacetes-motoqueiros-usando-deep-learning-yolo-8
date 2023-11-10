@@ -1,0 +1,21 @@
+{% extends 'layouts.html' %} {% block body %} 
+
+{% if data %}
+    <div style="width: 70%; margin: auto">
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
+    <script>
+        var ctx = document.getElementById('myChart').getContext('2d');
+        var chartData = {{ data | tojson | safe }};
+
+        new Chart(ctx, {
+                    type: 'bar',
+                    data: chartData,
+                });
+    </script>
+
+{% else %}
+    <p class="text-center py-8">{{ message }}</p>
+{% endif %} {% endblock %}
