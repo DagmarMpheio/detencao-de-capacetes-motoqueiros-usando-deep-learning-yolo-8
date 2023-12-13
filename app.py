@@ -11,7 +11,7 @@ from keras.models import load_model
 
 
 import flask
-from flask import Flask, render_template, request, send_file, redirect, url_for, Response
+from flask import Flask, render_template, request, send_file, redirect, url_for, Response, flash
 from werkzeug.utils import secure_filename
 from flask import send_from_directory
 import shutil
@@ -22,6 +22,9 @@ from ultralytics import YOLO
 
 
 app = Flask(__name__)
+
+# Definir a chave secreta no seu aplicativo Flask
+app.secret_key = b'8\xbfYs/\x90\xa7\xceO\x0f]\xfc\xb1\xb6\xe7\x9dm\x1d-\x96\xa3l\x1en'
 
 BASE_PATH = os.getcwd()
 UPLOAD_PATH = os.path.join(BASE_PATH, 'static/uploads/')
@@ -170,8 +173,17 @@ def fetch_data_from_db():
     conn.close()
     return data
 
+def fetch_all_data_from_db():
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM relatorio')
+    data = cursor.fetchall()
+    conn.close()
+    return data
+
 @app.route('/relatorio')
 def relatorio():
+    dados_tabela = fetch_all_data_from_db()
     totals = fetch_data_from_db()
     lista = [totals[0], totals[1]]
     dados = [0 if i is None else i for i in lista]
@@ -196,7 +208,7 @@ def relatorio():
                 }
             ]
         }
-        return render_template("relatorio.html", data=data)
+        return render_template("relatorio.html", data=data, dados_tabela=dados_tabela)
 
 with sqlite3.connect(DATABASE) as conn:
     cursor = conn.cursor()
@@ -240,6 +252,20 @@ def guardar():
         return redirect(url_for('relatorio'))
     return render_template("deteccao_imagem.html", upload=False)
 
+
+# funcao para excluir o historico
+@app.route('/delete-history/<int:id>', methods=['POST'])
+def delete_history(id):
+    if request.method=='POST':
+        # excluir historico
+        with sqlite3.connect(DATABASE) as conn:
+            cursor = conn.cursor()
+            cursor.execute(f"""
+                DELETE FROM relatorio WHERE id={id}
+            """)
+            conn.commit()
+            flash('Histórico excluído com sucesso!', 'success')
+        return redirect(url_for('relatorio'))
 
 def get_frame():
     folder_path = os.getcwd()
