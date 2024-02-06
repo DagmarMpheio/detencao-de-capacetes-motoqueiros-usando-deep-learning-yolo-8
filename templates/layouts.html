@@ -43,11 +43,24 @@
 			display: none;
 			height: 100%
 		}
+		.cor_top {
+			background-color: rgba(47, 123, 185, 0.932);
+		}
+
+		/* Estilos CSS para a classe 'active-route' */
+		.active-route {
+			padding: 3px;
+			background-color:rgba(29, 66, 99, 0.932);
+			color: #fff;
+			font-weight: bold;
+			border-radius: 5px;
+		}
+
 	</style>
 </head>
-
+<div class="cor_top">
 <body class="max-w-6xl mx-auto bg-gray-200">
-	<header class="md:flex justify-between md:items-center shadow-lg bg-purple-800 
+	<header id="cor_top" class="md:flex justify-between md:items-center shadow-lg 
 	py-1 text-white px-24">
 		<div class="flex justify-between items-center">
 			<div class="flex space-x-3 items-center">
@@ -70,18 +83,19 @@
 			</div>
 		</div>
 		<nav id="menu-items" class="hidden md:block">
+			{% set current_route = request.endpoint %}
 			<ul class="md:flex gap-3 text-lg font-semibold">
 				<a href="/" class="hover:border-b 
 				hover:ease-in-out 
 				 hover:border-purple-300 hover:duration-500
 				hover:text-purple-300">
-					<li>Home</li>
+					<li {% if current_route == 'home' %}class="active-route"{% endif %}>Home</li>
 				</a>
 				<a href="/deteccao" class="hover:border-b 
 				hover:ease-in-out 
 				 hover:border-purple-300 hover:duration-500
 				hover:text-purple-300">
-					<li>Detecção</li>
+					<li {% if current_route == 'deteccao' %}class="active-route"{% endif %}>Detecção</li>
 				</a>
 				<!-- <a href="#" class="hover:border-b 
 				hover:ease-in-out 
@@ -93,7 +107,7 @@
 				hover:ease-in-out 
 				 hover:border-purple-300 hover:duration-500
 				hover:text-purple-300">
-					<li class="animated backInDown">Relatório</li>
+					<li class="{% if current_route == 'relatorio' %} active-route {% endif %} animated backInDown">Relatório</li>
 				</a>
 			</ul>
 		</nav>
@@ -105,5 +119,5 @@
 	<script src="{{url_for('static',filename='js/menu.js')}}"></script>
 	<script src="{{url_for('static',filename='js/main.js')}}"></script>
 </body>
-
+</div>
 </html>

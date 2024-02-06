@@ -35,42 +35,52 @@ DATABASE = os.path.join(DATABASE_PATH, 'motoqueiro.db')
 @app.route('/')
 def home():
     return render_template("index.html")
-    
+
+
 # metodo de classificacao do modelo
 imgpath = None  # Definir uma variável global para armazenar o nome do arquivo
+
 
 @app.route("/deteccao", methods=["GET", "POST"])
 def deteccao():
     global imgpath  # Indicar que a variável imgpath será usada globalmente
-    
+
     if request.method == "POST":
         if 'file' in request.files:
             f = request.files['file']
-            # print(f)
+            modelo_nome = request.form.get('modelo_nome')
+            print("\nmodelo_nome: ", modelo_nome)
             basepath = os.path.dirname(__file__)
-            filepath = os.path.join(basepath,'uploads', f.filename)
+            filepath = os.path.join(basepath, 'uploads', f.filename)
             # print("upload folder is ", filepath)
             f.save(filepath)
-            
-            imgpath = f.filename # Atribuir o nome do arquivo à variável global imgpath
-            print("Imagem Detectada: ", imgpath) # Imprimir o valor da variável imgpath
 
-            file_extension = f.filename.rsplit('.',1)[1].lower()
-            #print("extensao: ",file_extension)
+            imgpath = f.filename  # Atribuir o nome do arquivo à variável global imgpath
+            # Imprimir o valor da variável imgpath
+            print("Imagem Detectada: ", imgpath)
+
+            file_extension = f.filename.rsplit('.', 1)[1].lower()
+            # print("extensao: ",file_extension)
 
             # se na requisicao tiver um ficheiro e está de acordo com as extensões permitidas, faça
-            if file_extension == 'jpg':
+            if file_extension == 'jpg' or 'png' or 'gif' or 'jpeg':
                 img = cv2.imread(filepath)
                 # print("img: ",img)
 
-                #Trabalhar com o YOLO na Detenção de imagens
-                model = YOLO('best.pt')
-                model.predict(filepath, save= True)
-                #print("yolo: ",model)
-                
+                # YOLO na Detenção de imagens como base no modelo escolhido
+                if modelo_nome == 'Medium':
+                    model = YOLO('M_best.pt')
+                elif modelo_nome == 'Nano':
+                    model = YOLO('N_best.pt')
+                else:
+                    model = YOLO('S_best.pt')
+
+                model.predict(filepath, save=True)
+                # print("yolo: ",model)
+
                 return display(f.filename)
-            
-            elif file_extension == 'mp4':
+
+            elif file_extension == 'mp4' or 'mkv' or 'avi' or 'flv':
                 video_path = filepath
                 cap = cv2.VideoCapture(video_path)
 
@@ -80,14 +90,20 @@ def deteccao():
 
                 # Definir o codec e criar o objecto VideoWrite
                 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-                out = cv2.VideoWriter('output.mp4', fourcc,30.0,(frame_width, frame_height))
+                out = cv2.VideoWriter(
+                    'output.mp4', fourcc, 30.0, (frame_width, frame_height))
 
-                # Inicializar o modelo YOLO v8 aqui
-                model = YOLO('best.pt')
+                 # YOLO na Detenção de imagens como base no modelo escolhido
+                if modelo_nome == 'Medium':
+                    model = YOLO('M_best.pt')
+                elif modelo_nome == 'Nano':
+                    model = YOLO('N_best.pt')
+                else:
+                    model = YOLO('S_best.pt')
 
                 while cap.isOpened():
-                    ret, frame=cap.read()
-                    if not ret: 
+                    ret, frame = cap.read()
+                    if not ret:
                         break
 
                     # Fazer a detenção do YOLO vc8 nos frames aqui
@@ -101,85 +117,92 @@ def deteccao():
                     # Escrever o video da saida
                     out.write(res_plotted)
 
-                    if cv2.waitKey(1)==ord('q'):
+                    if cv2.waitKey(1) == ord('q'):
                         break
-            
+
                 return video_feed()
-            
-        return render_template("deteccao_imagem.html", upload=True)
+
+        #return render_template("deteccao_imagem.html", upload=True)
+        return redirect(url_for('deteccao', _anchor='deteccao'))
     return render_template("deteccao_imagem.html", upload=False)
-            
+
     # se o usuario nao preencher o formulario, mantem na mesma pagina
-    #else:
-        #return render_template('index.html')
-    
-  
-    #folder_path = 'runs/detect'
-    #subfolders = [f for f in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, f))]
-    #latest_subfolder = max(subfolders, key=lambda x: os.path.getctime(os.path.join(folder_path, x)))
-    #image_path = folder_path+'/'+latest_subfolder+'/'+f.filename
-    #return render_template('index.html', image_path=image_path)
-    
+    # else:
+    # return render_template('index.html')
+
+    # folder_path = 'runs/detect'
+    # subfolders = [f for f in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, f))]
+    # latest_subfolder = max(subfolders, key=lambda x: os.path.getctime(os.path.join(folder_path, x)))
+    # image_path = folder_path+'/'+latest_subfolder+'/'+f.filename
+    # return render_template('index.html', image_path=image_path)
+
 @app.route('/show_image/<filename>')
 def show_image(filename):
     uploads_folder = os.path.join(app.root_path, 'uploads')
     latest_file_not_detected = os.path.join(uploads_folder, filename)
     return send_file(latest_file_not_detected, mimetype='image/jpeg')
 
+
 @app.route('/image/<path:filename>')
 def display(filename):
     folder_path = 'runs/detect'
-    subfolders = [f for f in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, f))]
-    latest_subfolder = max(subfolders, key=lambda x: os.path.getctime(os.path.join(folder_path,x)))
+    subfolders = [f for f in os.listdir(
+        folder_path) if os.path.isdir(os.path.join(folder_path, f))]
+    latest_subfolder = max(subfolders, key=lambda x: os.path.getctime(
+        os.path.join(folder_path, x)))
     directory = folder_path+'/'+latest_subfolder
-    #print("Mostrando sub directorios: ", directory)
+    # print("Mostrando sub directorios: ", directory)
     files = os.listdir(directory)
     latest_file = files[0]
 
-    #print("ultima imagem: ",latest_file)
+    # print("ultima imagem: ",latest_file)
 
     filename = os.path.join(folder_path, latest_subfolder, latest_file)
-    #print("file: ",filename)
-    
+    # print("file: ",filename)
+
     basepath = os.path.dirname(__file__)
-    #latest_file_not_detected = os.path.join(basepath,'uploads', latest_file)
-   
-    #uploads_folder = os.path.join(app.root_path, 'uploads')
-    #latest_file_not_detected = os.path.join(uploads_folder, filename=latest_file)
-    file_extension = filename.rsplit('.',1)[1].lower()
+    # latest_file_not_detected = os.path.join(basepath,'uploads', latest_file)
+
+    # uploads_folder = os.path.join(app.root_path, 'uploads')
+    # latest_file_not_detected = os.path.join(uploads_folder, filename=latest_file)
+    file_extension = filename.rsplit('.', 1)[1].lower()
     uploads_folder = os.path.join(app.root_path, 'uploads')
     latest_file_not_detected = os.path.join(uploads_folder, filename)
     environ = request.environ
     if file_extension == 'jpg':
         # Copiar o arquivo para o diretório de destino
         shutil.copy(filename, 'static/detencoes')
-        
-        #return send_from_directory(directory, filename) # Mostrar o resultado detectados no boldenbox
-        #return render_template('display_image.html', filename=latest_file, directory=directory)
+
+        # return send_from_directory(directory, filename) # Mostrar o resultado detectados no boldenbox
+        # return render_template('display_image.html', filename=latest_file, directory=directory)
         # Renderize a mesma página com a imagem enviada
-        #return render_template('index.html', latest_file=latest_file)
+        # return render_template('index.html', latest_file=latest_file)
         # Redirecione para a página que exibirá a imagem enviada
-        return render_template('deteccao_imagem.html', latest_file=latest_file, 
+        return render_template('deteccao_imagem.html', latest_file=latest_file,
                                latest_file_not_detected=latest_file_not_detected)
-    
+
     else:
         return " Invalid file format"
+
 
 def fetch_data_from_db():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
-    cursor.execute('SELECT sum(n_com_capacete), sum(n_sem_capacete) FROM relatorio')
+    cursor.execute(
+        'SELECT sum(n_com_capacete), sum(n_sem_capacete) FROM relatorio')
     data = cursor.fetchone()
     conn.close()
     return data
 
+
 def fetch_all_data_from_db():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM relatorio')
+    cursor.execute('SELECT * FROM relatorio ORDER BY criado_em DESC')
     data = cursor.fetchall()
     conn.close()
     return data
+
 
 @app.route('/relatorio')
 def relatorio():
@@ -188,27 +211,30 @@ def relatorio():
     lista = [totals[0], totals[1]]
     dados = [0 if i is None else i for i in lista]
     totalSoma = sum(dados)
-    if(totalSoma == 0):
+    if (totalSoma == 0):
         return render_template("relatorio.html", message='Sem resultados para o relatorio')
     else:
         values = [totals[0], totals[1]]
         totalCapacete = (totals[0] / sum(values)) * 100
         totalSemCapacete = (totals[1] / sum(values)) * 100
         valueTotal = [totalCapacete, totalSemCapacete]
-        #print(len(values))
+        # print(len(values))
         data = {
-            "labels": ['Motoqueiros com capacetes', 'Motoqueiros sem capacete'],
+
+            "labels": ['Motoqueiros com capacetes {}%'.format(round(totalCapacete, 2)), 'Motoqueiros sem capacete {} %'.format(round(totalSemCapacete, 2))],
             "datasets": [
+
                 {
                     "label": "Relatório dos Motoqueiros detectados",
                     "borderWidth": 1,
                     "fillColor": "rgba(220,220,220,0.5)",
-                    "backgroundColor": ['green', 'blue', 'yellow', 'purple'],
+                    "backgroundColor": ['#16a34a', '#dc2626', 'yellow', 'purple'],
                     "data": valueTotal
-                }
+                },
             ]
         }
         return render_template("relatorio.html", data=data, dados_tabela=dados_tabela)
+
 
 with sqlite3.connect(DATABASE) as conn:
     cursor = conn.cursor()
@@ -235,7 +261,7 @@ def guardar():
         #     return redirect(request.url)
 
         # imagem = image.filename
-        imagem = request.form.get('image', '')
+        imagem = request.form.get('imagem')
         n_com_capacete = request.form.get('n_com_capacete', '')
         n_sem_capacete = request.form.get('n_sem_capacete', '')
 
@@ -256,7 +282,7 @@ def guardar():
 # funcao para excluir o historico
 @app.route('/delete-history/<int:id>', methods=['POST'])
 def delete_history(id):
-    if request.method=='POST':
+    if request.method == 'POST':
         # excluir historico
         with sqlite3.connect(DATABASE) as conn:
             cursor = conn.cursor()
@@ -267,10 +293,11 @@ def delete_history(id):
             flash('Histórico excluído com sucesso!', 'success')
         return redirect(url_for('relatorio'))
 
+
 def get_frame():
     folder_path = os.getcwd()
     mp4_files = 'output.mp4'
-    video = cv2.VideoCapture(mp4_files) # caminho de detenção de video
+    video = cv2.VideoCapture(mp4_files)  # caminho de detenção de video
     while True:
         success, image = video.read()
         if not success:
@@ -278,17 +305,21 @@ def get_frame():
         ret, jpeg = cv2.imencode('.jpg', image)
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + jpeg.tobytes() + b'\r\n\r\n')
-        time.sleep(0.1) # Controlar o video pro um(1)ms no ecrá
+        time.sleep(0.1)  # Controlar o video pro um(1)ms no ecrá
 
 # Função para detectar objectos em video numa página HTML
+
+
 @app.route("/video_feed")
 def video_feed():
-    print ("function called")
+    print("function called")
     return Response(get_frame(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="SISDET")
     parser.add_argument("--port", default=5000, type=int, help="port number")
     args = parser.parse_args()
-    app.run(host="0.0.0.0", port=args.port)  # debug=True causes Restarting with stat
+    # debug=True causes Restarting with stat
+    app.run(host="0.0.0.0", port=args.port)
