@@ -1,19 +1,8 @@
 import os
 import argparse
-from PIL import Image
-
-import torch
 import cv2
-import numpy as np
-import tensorflow as tf
-from keras.utils import load_img, img_to_array
-from keras.models import load_model
 
-
-import flask
 from flask import Flask, render_template, request, send_file, redirect, url_for, Response, flash
-from werkzeug.utils import secure_filename
-from flask import send_from_directory
 import shutil
 import time
 import sqlite3
@@ -221,11 +210,11 @@ def relatorio():
         # print(len(values))
         data = {
 
-            "labels": ['Motoqueiros com capacetes {}%'.format(round(totalCapacete, 2)), 'Motoqueiros sem capacete {} %'.format(round(totalSemCapacete, 2))],
+            "labels": ['Com capacete {}%'.format(round(totalCapacete, 2)), 'Sem capacete {} %'.format(round(totalSemCapacete, 2))],
             "datasets": [
 
                 {
-                    "label": "Relatório dos Motoqueiros detectados",
+                    "label": "Relatório dos Motoqueiros Detectados",
                     "borderWidth": 1,
                     "fillColor": "rgba(220,220,220,0.5)",
                     "backgroundColor": ['#16a34a', '#dc2626', 'yellow', 'purple'],
