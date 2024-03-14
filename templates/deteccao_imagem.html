@@ -53,8 +53,8 @@
 					style="height:300px; width:300px" />
 			</div>
 			<div id="deteccao">
-				<h2 class="mb-6">Imagem com as detenções:</h2>
-				<img id="my-image" src="{{ url_for('static', filename='detencoes'+'/'+latest_file) }}"
+				<h2 class="mb-6">Imagem com as detenções: {{latest_file}}</h2>
+				<img id="my-image" src="{{ url_for('static', filename='deteccoes-imagens'+'/'+latest_file) }}"
 					style="height:300px; width:300px;" />
 			</div>
 		</div>

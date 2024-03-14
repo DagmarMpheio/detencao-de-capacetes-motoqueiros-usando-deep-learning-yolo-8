@@ -40,19 +40,21 @@ def deteccao():
             modelo_nome = request.form.get('modelo_nome')
             print("\nmodelo_nome: ", modelo_nome)
             basepath = os.path.dirname(__file__)
-            filepath = os.path.join(basepath, 'uploads', f.filename)
-            # print("upload folder is ", filepath)
-            f.save(filepath)
-
+            file_extension = f.filename.rsplit('.', 1)[1].lower()
+            print("extensao: ",file_extension)
             imgpath = f.filename  # Atribuir o nome do arquivo à variável global imgpath
             # Imprimir o valor da variável imgpath
-            print("Imagem Detectada: ", imgpath)
+            print("Imagem / Video Detectado: ", imgpath)
 
             file_extension = f.filename.rsplit('.', 1)[1].lower()
             # print("extensao: ",file_extension)
 
             # se na requisicao tiver um ficheiro e está de acordo com as extensões permitidas, faça
-            if file_extension == 'jpg' or 'png' or 'gif' or 'jpeg':
+            if file_extension == 'jpg' or file_extension == 'png' or file_extension == 'gif' or file_extension == 'jpeg':
+                filepath = os.path.join(basepath, 'static/uploads-imagens', f.filename)
+                print("upload folder is ", filepath)
+                f.save(filepath)
+
                 img = cv2.imread(filepath)
                 # print("img: ",img)
 
@@ -69,7 +71,12 @@ def deteccao():
 
                 return display(f.filename)
 
-            elif file_extension == 'mp4' or 'mkv' or 'avi' or 'flv':
+            elif file_extension == 'mp4' or file_extension == 'mkv' or file_extension == 'avi' or file_extension == 'flv':
+                filepath = os.path.join(basepath, 'static/uploads-videos', f.filename)
+                print("upload folder is ", filepath)
+                f.save(filepath)
+
+
                 video_path = filepath
                 cap = cv2.VideoCapture(video_path)
 
@@ -80,7 +87,9 @@ def deteccao():
                 # Definir o codec e criar o objecto VideoWrite
                 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
                 out = cv2.VideoWriter(
-                    'output.mp4', fourcc, 30.0, (frame_width, frame_height))
+                    'output.mp4', fourcc, 30.0, (30, 30))
+                """ out = cv2.VideoWriter(
+                    'output.mp4', fourcc, 30.0, (frame_width, frame_height)) """
 
                  # YOLO na Detenção de imagens como base no modelo escolhido
                 if modelo_nome == 'Medium':
@@ -127,8 +136,9 @@ def deteccao():
 
 @app.route('/show_image/<filename>')
 def show_image(filename):
-    uploads_folder = os.path.join(app.root_path, 'uploads')
+    uploads_folder = os.path.join(app.root_path+"/static", 'uploads-imagens')
     latest_file_not_detected = os.path.join(uploads_folder, filename)
+    print("latest_file_not_detected: ",latest_file_not_detected)
     return send_file(latest_file_not_detected, mimetype='image/jpeg')
 
 
@@ -155,12 +165,19 @@ def display(filename):
     # uploads_folder = os.path.join(app.root_path, 'uploads')
     # latest_file_not_detected = os.path.join(uploads_folder, filename=latest_file)
     file_extension = filename.rsplit('.', 1)[1].lower()
-    uploads_folder = os.path.join(app.root_path, 'uploads')
-    latest_file_not_detected = os.path.join(uploads_folder, filename)
+    print("Extensao do ficheiro: ",file_extension)
+
+    if file_extension == 'jpg' or 'png':
+        uploads_folder = os.path.join(app.root_path, 'static/uploads-imagens')
+        latest_file_not_detected = os.path.join(uploads_folder, filename)
+    else:
+        uploads_folder = os.path.join(app.root_path, 'static/uploads-videos')
+        latest_file_not_detected = os.path.join(uploads_folder, filename)
     environ = request.environ
-    if file_extension == 'jpg':
+
+    if file_extension == 'jpg' or 'png':
         # Copiar o arquivo para o diretório de destino
-        shutil.copy(filename, 'static/detencoes')
+        shutil.copy(filename, 'static/deteccoes-imagens')
 
         # return send_from_directory(directory, filename) # Mostrar o resultado detectados no boldenbox
         # return render_template('display_image.html', filename=latest_file, directory=directory)
@@ -169,9 +186,16 @@ def display(filename):
         # Redirecione para a página que exibirá a imagem enviada
         return render_template('deteccao_imagem.html', latest_file=latest_file,
                                latest_file_not_detected=latest_file_not_detected)
+    
+    if file_extension == 'mp4' or 'mkv' or 'avi':
+        # Copiar o arquivo para o diretório de destino
+        shutil.copy(filename, 'static/deteccoes-videos')
+
+        return render_template('deteccao_imagem.html', latest_file=latest_file,
+                               latest_file_not_detected=latest_file_not_detected)
 
     else:
-        return " Invalid file format"
+        return "Formato do ficheiro inválido"
 
 
 def fetch_data_from_db():
@@ -207,6 +231,7 @@ def relatorio():
         totalCapacete = (totals[0] / sum(values)) * 100
         totalSemCapacete = (totals[1] / sum(values)) * 100
         valueTotal = [totalCapacete, totalSemCapacete]
+        print("valueTotal: ",sum(values))
         # print(len(values))
         data = {
 
@@ -222,7 +247,7 @@ def relatorio():
                 },
             ]
         }
-        return render_template("relatorio.html", data=data, dados_tabela=dados_tabela)
+        return render_template("relatorio.html", data=data, dados_tabela=dados_tabela, totalCapacete=totals[0], totalSemCapacete=totals[1], total=sum(values))
 
 
 with sqlite3.connect(DATABASE) as conn:
