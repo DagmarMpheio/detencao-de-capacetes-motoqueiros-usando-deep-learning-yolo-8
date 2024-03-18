@@ -41,7 +41,7 @@ def deteccao():
             print("\nmodelo_nome: ", modelo_nome)
             basepath = os.path.dirname(__file__)
             file_extension = f.filename.rsplit('.', 1)[1].lower()
-            print("extensao: ",file_extension)
+            print("extensao: ", file_extension)
             imgpath = f.filename  # Atribuir o nome do arquivo à variável global imgpath
             # Imprimir o valor da variável imgpath
             print("Imagem / Video Detectado: ", imgpath)
@@ -51,7 +51,8 @@ def deteccao():
 
             # se na requisicao tiver um ficheiro e está de acordo com as extensões permitidas, faça
             if file_extension == 'jpg' or file_extension == 'png' or file_extension == 'gif' or file_extension == 'jpeg':
-                filepath = os.path.join(basepath, 'static/uploads-imagens', f.filename)
+                filepath = os.path.join(
+                    basepath, 'static/uploads-imagens', f.filename)
                 print("upload folder is ", filepath)
                 f.save(filepath)
 
@@ -72,10 +73,10 @@ def deteccao():
                 return display(f.filename)
 
             elif file_extension == 'mp4' or file_extension == 'mkv' or file_extension == 'avi' or file_extension == 'flv':
-                filepath = os.path.join(basepath, 'static/uploads-videos', f.filename)
+                filepath = os.path.join(
+                    basepath, 'static/uploads-videos', f.filename)
                 print("upload folder is ", filepath)
                 f.save(filepath)
-
 
                 video_path = filepath
                 cap = cv2.VideoCapture(video_path)
@@ -87,11 +88,9 @@ def deteccao():
                 # Definir o codec e criar o objecto VideoWrite
                 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
                 out = cv2.VideoWriter(
-                    'output.mp4', fourcc, 30.0, (30, 30))
-                """ out = cv2.VideoWriter(
-                    'output.mp4', fourcc, 30.0, (frame_width, frame_height)) """
+                    'static/deteccoes-videos/'+f.filename+'.mp4', fourcc, 30.0, (frame_width, frame_height))
 
-                 # YOLO na Detenção de imagens como base no modelo escolhido
+                # YOLO na Detenção de imagens como base no modelo escolhido
                 if modelo_nome == 'Medium':
                     model = YOLO('M_best.pt')
                 elif modelo_nome == 'Nano':
@@ -117,10 +116,11 @@ def deteccao():
 
                     if cv2.waitKey(1) == ord('q'):
                         break
+                #return display(f.filename)
 
                 return video_feed()
 
-        #return render_template("deteccao_imagem.html", upload=True)
+        # return render_template("deteccao_imagem.html", upload=True)
         return redirect(url_for('deteccao', _anchor='deteccao'))
     return render_template("deteccao_imagem.html", upload=False)
 
@@ -134,12 +134,22 @@ def deteccao():
     # image_path = folder_path+'/'+latest_subfolder+'/'+f.filename
     # return render_template('index.html', image_path=image_path)
 
+
 @app.route('/show_image/<filename>')
 def show_image(filename):
     uploads_folder = os.path.join(app.root_path+"/static", 'uploads-imagens')
     latest_file_not_detected = os.path.join(uploads_folder, filename)
-    print("latest_file_not_detected: ",latest_file_not_detected)
+    print("latest_file_not_detected: ", latest_file_not_detected)
     return send_file(latest_file_not_detected, mimetype='image/jpeg')
+
+
+@app.route('/show_video/<filename>')
+def show_video(filename):
+    uploads_folder = os.path.join(app.root_path+"/static", 'uploads-videos')
+    video_path = os.path.join(uploads_folder, filename)
+    print("video_path: ", video_path)
+    # mimetype='video/x-msvideo'
+    return send_file(video_path, mimetype='video/x-msvideo')
 
 
 @app.route('/image/<path:filename>')
@@ -165,9 +175,9 @@ def display(filename):
     # uploads_folder = os.path.join(app.root_path, 'uploads')
     # latest_file_not_detected = os.path.join(uploads_folder, filename=latest_file)
     file_extension = filename.rsplit('.', 1)[1].lower()
-    print("Extensao do ficheiro: ",file_extension)
+    print("Extensao do ficheiro: ", file_extension)
 
-    if file_extension == 'jpg' or 'png':
+    if file_extension == 'jpg' or file_extension=='png':
         uploads_folder = os.path.join(app.root_path, 'static/uploads-imagens')
         latest_file_not_detected = os.path.join(uploads_folder, filename)
     else:
@@ -175,7 +185,7 @@ def display(filename):
         latest_file_not_detected = os.path.join(uploads_folder, filename)
     environ = request.environ
 
-    if file_extension == 'jpg' or 'png':
+    if file_extension == 'jpg' or file_extension == 'png':
         # Copiar o arquivo para o diretório de destino
         shutil.copy(filename, 'static/deteccoes-imagens')
 
@@ -185,14 +195,14 @@ def display(filename):
         # return render_template('index.html', latest_file=latest_file)
         # Redirecione para a página que exibirá a imagem enviada
         return render_template('deteccao_imagem.html', latest_file=latest_file,
-                               latest_file_not_detected=latest_file_not_detected)
-    
-    if file_extension == 'mp4' or 'mkv' or 'avi':
+                               latest_file_not_detected=latest_file_not_detected, file_extension=file_extension)
+
+    if file_extension == 'mp4' or file_extension == 'mkv' or file_extension == 'avi':
         # Copiar o arquivo para o diretório de destino
         shutil.copy(filename, 'static/deteccoes-videos')
 
         return render_template('deteccao_imagem.html', latest_file=latest_file,
-                               latest_file_not_detected=latest_file_not_detected)
+                               latest_file_not_detected=latest_file_not_detected, file_extension=file_extension)
 
     else:
         return "Formato do ficheiro inválido"
@@ -231,7 +241,7 @@ def relatorio():
         totalCapacete = (totals[0] / sum(values)) * 100
         totalSemCapacete = (totals[1] / sum(values)) * 100
         valueTotal = [totalCapacete, totalSemCapacete]
-        print("valueTotal: ",sum(values))
+        print("valueTotal: ", sum(values))
         # print(len(values))
         data = {
 
