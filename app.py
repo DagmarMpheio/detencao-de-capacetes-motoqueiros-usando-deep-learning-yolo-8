@@ -88,7 +88,7 @@ def deteccao():
                 # Definir o codec e criar o objecto VideoWrite
                 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
                 out = cv2.VideoWriter(
-                    'static/deteccoes-videos/'+f.filename+'.mp4', fourcc, 30.0, (frame_width, frame_height))
+                    'static/deteccoes-videos/'+f.filename, fourcc, 30.0, (frame_width, frame_height))
 
                 # YOLO na Detenção de imagens como base no modelo escolhido
                 if modelo_nome == 'Medium':
