@@ -63,13 +63,13 @@
 					<!-- detected image display -->
 					<div>
 						<h2 class="mb-6">Vídeo Original:</h2>
-						<video style="height:300px; width:300px">
+						<video controls style="height:300px; width:300px">
 							<source src="{{ url_for('show_video',  filename=latest_file) }}" type="video/x-msvideo">
 						</video>
 					</div>
 					<div id="deteccao">
 						<h2 class="mb-6">Vídeo com as detenções: {{latest_file}}</h2>
-						<video style="height:300px; width:300px">
+						<video controls style="height:300px; width:300px">
 							<source src="{{ url_for('static', filename='deteccoes-videos'+'/'+latest_file) }}" type="video/x-msvideo">
 						</video>
 					</div>

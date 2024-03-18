@@ -340,6 +340,18 @@ def video_feed():
     return Response(get_frame(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
+@app.route("/latest_video_feed")
+def latest_video_feed():
+    videos_folder = os.path.join(app.static_folder, "deteccoes-videos")
+    files = os.listdir(videos_folder)
+    if not files:
+        return "Nenhum vídeo encontrado"
+    
+    latest_file = max(files, key=lambda x: os.path.getmtime(os.path.join(videos_folder, x)))
+    latest_file_path = os.path.join(videos_folder, latest_file)
+    
+    return send_file(latest_file_path, mimetype='video/mp4')
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="SISDET")
