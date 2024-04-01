@@ -34,6 +34,12 @@ imgpath = None  # Definir uma variável global para armazenar o nome do arquivo
 def deteccao():
     global imgpath  # Indicar que a variável imgpath será usada globalmente
 
+    video_output_path = None  # Caminho do vídeo processado
+    video_output_name = None  # Nome do vídeo processado
+    original_video_output = None  # Nome do vídeo processado
+    original_video_output_name = None  # Nome do vídeo processado
+
+
     if request.method == "POST":
         if 'file' in request.files:
             f = request.files['file']
@@ -43,8 +49,10 @@ def deteccao():
             file_extension = f.filename.rsplit('.', 1)[1].lower()
             print("extensao: ", file_extension)
             imgpath = f.filename  # Atribuir o nome do arquivo à variável global imgpath
+            original_video_output_name = imgpath
             # Imprimir o valor da variável imgpath
             print("Imagem / Video Detectado: ", imgpath)
+            print("Imagem / Video Original: ", original_video_output_name)
 
             file_extension = f.filename.rsplit('.', 1)[1].lower()
             # print("extensao: ",file_extension)
@@ -86,7 +94,8 @@ def deteccao():
                 frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
                 # Definir o codec e criar o objecto VideoWrite
-                fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+                #fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+                fourcc = cv2.VideoWriter_fourcc(*'X264')  # Usando o codec X264 para MKV
                 out = cv2.VideoWriter(
                     'static/deteccoes-videos/'+f.filename, fourcc, 30.0, (frame_width, frame_height))
 
@@ -105,20 +114,25 @@ def deteccao():
 
                     # Fazer a detenção do YOLO vc8 nos frames aqui
                     results = model(frame, save=True)
-                    print(results)
+                    print("results: ",results)
                     cv2.waitKey(1)
 
                     res_plotted = results[0].plot()
-                    cv2.imshow("result", res_plotted)
+                    #cv2.imshow("result", res_plotted)
 
                     # Escrever o video da saida
                     out.write(res_plotted)
+
+                    video_output_name = f.filename
+                    video_output_path = 'static/deteccoes-videos/' + video_output_name
+                    original_video_output = 'static/uploads-videos/' + original_video_output_name
 
                     if cv2.waitKey(1) == ord('q'):
                         break
                 #return display(f.filename)
 
-                return video_feed()
+                #return video_feed()
+                return display_video(video_output_path, original_video_output, original_video_output_name)
 
         # return render_template("deteccao_imagem.html", upload=True)
         return redirect(url_for('deteccao', _anchor='deteccao'))
@@ -150,6 +164,11 @@ def show_video(filename):
     print("video_path: ", video_path)
     # mimetype='video/x-msvideo'
     return send_file(video_path, mimetype='video/x-msvideo')
+
+@app.route("/display_video/<video_path>")
+def display_video(video_path, original_video_path, original_video_output_name):
+    #video_path = f'static/deteccoes-videos/{video_path}'
+    return render_template('video_display.html', video_path=video_path, original_video_path=original_video_path, original_video_output_name = original_video_output_name)
 
 
 @app.route('/image/<path:filename>')

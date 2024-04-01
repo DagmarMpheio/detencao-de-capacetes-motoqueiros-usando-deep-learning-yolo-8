@@ -60,5 +60,6 @@ document.querySelectorAll('.dropzone_input').forEach(inputElement => {
     if (inputElement) {
       inputElement.value = ''; // Reset input value to clear selected file
     }
+    dropzoneElement.querySelector(".dropzone_prompt").value = "Seleccione uma imagem ou vídeo";
   }
   

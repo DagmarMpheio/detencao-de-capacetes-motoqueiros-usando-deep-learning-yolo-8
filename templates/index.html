@@ -33,15 +33,15 @@
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2 px-24 mt-5 mb-4">
     <!-- Adicione margem inferior aqui -->
     <!-- Videos -->
-    <div class="h-48 w-full flex items-center justify-center">
-      <video class="w-full h-full object-cover rounded-md" controls autoplay muted title="Vídeo Original">
-        <source src="{{ url_for('static', filename='images/input-video.mp4') }}" type="video/mp4">
+    <div class="h-72 w-full flex items-center justify-center">
+      <video class="w-full h-full object-cover rounded-md" controls autoplay muted loop title="Vídeo Original">
+        <source src="{{ url_for('static', filename='videos/18-teste-original.mp4') }}" type="video/mp4">
       </video>
     </div>
 
-    <div class="h-48 w-full flex items-center justify-center">
-      <video class="w-full h-full object-cover rounded-md" controls autoplay muted title="Vídeo Detectado">
-        <source src="{{ url_for('static', filename='images/output-video.mkv') }}" type="video/mp4">
+    <div class="h-72 w-full flex items-center justify-center">
+      <video class="w-full h-full object-cover rounded-md" controls autoplay muted loop title="Vídeo Detectado">
+        <source src="{{ url_for('static', filename='videos/18-teste-detectado.mkv') }}" type="video/mp4">
       </video>
     </div>
 

@@ -59,13 +59,15 @@
 	</style>
 </head>
 <div class="cor_top">
-<body class="max-w-6xl mx-auto bg-gray-200">
+<body class="max-w-6xl mx-auto bg-gray-200 ">
 	<header id="cor_top" class="md:flex justify-between md:items-center shadow-lg 
 	py-1 text-white px-24">
 		<div class="flex justify-between items-center">
 			<div class="flex space-x-3 items-center">
 				<a href="/">
 					<img class="w-20 h-20" src="{{ url_for('static', filename='images/SisMoto.png') }}" alt="Image" />
+				</a>
+				<a href="/">
 					<h4 class="text-3xl font-bold tracking-wider
 						uppercase text-white">
 						SISDET
@@ -115,8 +117,8 @@
 		</nav>
 	</header>
 	<div class=" bg-white">{% block body %}{% endblock %}</div>
-	<footer class="flex-1 bg-red-500 py-4 text-white uppercase text-center font-semibold text-sm">
-		<h1>Todos direitos reservados &copy; 2023</h1>
+	<footer class="flex-1 bg-gray-800 py-4 text-white uppercase text-center font-semibold text-sm ">
+		<h1>Todos direitos reservados &copy; 2024</h1>
 	</footer>
 	<script src="{{url_for('static',filename='js/menu.js')}}"></script>
 	<script src="{{url_for('static',filename='js/main.js')}}"></script>

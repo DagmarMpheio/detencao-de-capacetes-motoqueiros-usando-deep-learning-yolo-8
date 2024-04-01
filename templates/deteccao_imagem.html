@@ -11,13 +11,13 @@
 		border-green-400 max-w-6xl h-96 w-[600px] px-2 flex items-center justify-center
 		dropzone">
 				<!-- <div class="dropzone_thumb" data-label="mota.txt"></div> -->
-				<span class="dropzone_prompt">Seleccione uma imagem ou vídeo</span>
+				<span class="dropzone_prompt" id="dropzone_prompt">Seleccione uma imagem ou vídeo</span>
 				<input type="file" accept="image/*, video/*" name="file" class="dropzone_input" id="image_ou_video"
 					required>
 			</div>
 
 			<button class="remove-button bg-red-600 text-white py-2 tracking-widest
-			rounded-md shadow-md mt-3 w-full max-w-screen-sm px-8 uppercase font-black" onclick="removeThumbnail(this.parentElement)">Remover Imagem</button> <!-- Botão de remoção -->
+			rounded-md shadow-md mt-3 w-full max-w-screen-sm px-8 uppercase font-black" onclick="removeThumbnail(this.parentElement)" type="button">Remover Ficheiro</button> <!-- Botão de remoção -->
 			<!--    <div class="mb-5">
 		  <label for="imagem" class="block text-gray-700 text-sm mb-2">Imagem</label>
 		  <div class="dropzone rounded-md bg-gray-100">
@@ -53,30 +53,15 @@
 					<div>
 						<h2 class="mb-6">Imagem Original:</h2>
 						<img id="my-image" src="{{ url_for('show_image',  filename=latest_file) }}"
-							style="height:300px; width:300px" />
+							style="height:300px; width:300px" class="rounded-md"/>
 					</div>
 					<div id="deteccao">
 						<h2 class="mb-6">Imagem com as detenções: {{latest_file}}</h2>
 						<img id="my-image" src="{{ url_for('static', filename='deteccoes-imagens'+'/'+latest_file) }}"
-							style="height:300px; width:300px;" />
+							style="height:300px; width:300px;" class="rounded-md"/>
 					</div>
 				</div>
-			{% else %}
-				<div class="flex justify-between gap-x-4 items-center">
-					<!-- detected image display -->
-					<div>
-						<h2 class="mb-6">Vídeo Original:</h2>
-						<video controls style="height:300px; width:300px">
-							<source src="{{ url_for('show_video',  filename=latest_file) }}" type="video/x-msvideo">
-						</video>
-					</div>
-					<div id="deteccao">
-						<h2 class="mb-6">Vídeo com as detenções: {{latest_file}}</h2>
-						<video controls style="height:300px; width:300px">
-							<source src="{{ url_for('static', filename='deteccoes-videos'+'/'+latest_file) }}" type="video/x-msvideo">
-						</video>
-					</div>
-				</div>
+					
 			{% endif %}
 
 		<div class="py-4">
@@ -104,31 +89,6 @@
 	</div>
 	<br>
 </div>
-
-<!-- <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const form = document.getElementById("data-form");
-        const responseDiv = document.getElementById("messageErro");
-
-        form.addEventListener("submit", function (event) {
-            event.preventDefault(); 
-
-            const formData = new FormData(form);
-
-            fetch("/deteccao", {
-                method: "POST",
-                body: formData,
-            })
-            .then((response) => response.text())
-            .then((data) => {
-                responseDiv.innerHTML = data;
-            })
-            .catch((error) => {
-                console.error("Error:", error);
-            });
-        });
-    });
-</script> -->
 
 <script>
 	function validar() {
