@@ -14,6 +14,7 @@ app = Flask(__name__)
 
 # Definir a chave secreta no seu aplicativo Flask
 app.secret_key = b'8\xbfYs/\x90\xa7\xceO\x0f]\xfc\xb1\xb6\xe7\x9dm\x1d-\x96\xa3l\x1en'
+app.config['MAX_CONTENT_LENGHT'] = 16 * 1024 * 1024
 
 BASE_PATH = os.getcwd()
 UPLOAD_PATH = os.path.join(BASE_PATH, 'static/uploads/')
@@ -93,6 +94,7 @@ def deteccao():
                 frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
                 frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
+               
                 # Definir o codec e criar o objecto VideoWrite
                 #fourcc = cv2.VideoWriter_fourcc(*'mp4v')
                 fourcc = cv2.VideoWriter_fourcc(*'X264')  # Usando o codec X264 para MKV
