@@ -6,8 +6,6 @@ bin-release/
 
 # Other files and folders
 .settings/
-
-/Testes/
 .yolov8m.pt
 
 # Executables
