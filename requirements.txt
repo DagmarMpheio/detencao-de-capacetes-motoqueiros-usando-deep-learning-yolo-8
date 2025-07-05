@@ -1,2 +1,3 @@
+flask
 ultralytics==8.3.158
 opencv-python~=4.10.0
