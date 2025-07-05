@@ -27,11 +27,11 @@ DATABASE = os.path.join(DATABASE_PATH, 'motoqueiro.db')
 @app.route('/')
 def home():
     # verificar as versões dos pacotes
-    print("ultralytics:", ultralytics.__version__)
+    """ print("ultralytics:", ultralytics.__version__)
     print("cv2:", cv2.__version__)
     print("shutil: built-in")
     print("time: built-in")
-    print("sqlite3:", sqlite3.sqlite_version)
+    print("sqlite3:", sqlite3.sqlite_version) """
     return render_template("index.html")
 
 
